@@ -1,0 +1,39 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/05/01 01:05:11 by vbicer            #+#    #+#             */
+/*   Updated: 2025/05/01 01:23:24 by vbicer           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "utils.h"
+
+long get_time_ms(void)
+{
+    struct timeval tv;
+    
+    gettimeofday(&tv,NULL);
+    return((tv.tv_sec *1000) + (tv.tv_usec / 1000));
+}
+
+void smart_sleep(long time)
+{
+    long start = get_time_ms();
+    while ((get_time_ms() - start) < time)
+        usleep(100);
+}
+
+void print_action(t_philo *philo, char *action)
+{
+    long time;
+
+    pthread_mutex_lock(&philo->data->print_mutex);
+    time = get_time_ms() - philo->data->start_time;
+    if(!philo->data->someone_died)
+        printf("%ld %d %s\n", time, philo->id, action);
+    pthread_mutex_unlock(&philo->data->print_mutex);
+}
