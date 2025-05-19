@@ -43,6 +43,7 @@ struct s_data {
 
     pthread_mutex_t *forks;
     pthread_mutex_t print_mutex;
+	pthread_mutex_t someone_died_mutex;
 
     t_philo         *philos;
 };

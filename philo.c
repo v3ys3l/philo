@@ -19,15 +19,45 @@ void *philo_life(void *arg)
 	if (ph->id % 2 == 0)
 		usleep(100);
 
-	while (1)
+	if (ph->data->number_of_philosophers == 1)
 	{
 		print_action(ph, "is thinking");
-
 		pthread_mutex_lock(ph->left_fork);
 		print_action(ph, "has taken a fork");
+		smart_sleep(ph->data->time_to_die);
 
-		pthread_mutex_lock(ph->right_fork);
-		print_action(ph, "has taken a fork");
+		pthread_mutex_lock(&ph->data->someone_died_mutex);
+		ph->data->someone_died = 1;
+		printf("%ld %d died\n", get_time_ms() - ph->data->start_time, ph->id);
+		pthread_mutex_unlock(&ph->data->someone_died_mutex);
+		pthread_mutex_unlock(ph->left_fork);
+		return NULL;
+	}
+
+	while (1)
+	{
+		pthread_mutex_lock(&ph->data->someone_died_mutex);
+		if (ph->data->someone_died) {
+			pthread_mutex_unlock(&ph->data->someone_died_mutex);
+			break;
+		}
+		pthread_mutex_unlock(&ph->data->someone_died_mutex);
+
+		print_action(ph, "is thinking");
+
+		if (ph->id % 2 == 0) {
+			pthread_mutex_lock(ph->right_fork);
+			print_action(ph, "has taken a fork");
+
+			pthread_mutex_lock(ph->left_fork);
+			print_action(ph, "has taken a fork");
+		} else {
+			pthread_mutex_lock(ph->left_fork);
+			print_action(ph, "has taken a fork");
+
+			pthread_mutex_lock(ph->right_fork);
+			print_action(ph, "has taken a fork");
+		}
 
 		pthread_mutex_lock(&ph->data->print_mutex);
 		ph->last_meal = get_time_ms();
@@ -64,25 +94,27 @@ void *monitor(void *arg)
 		{
 			t_philo *ph = &data->philos[i];
 
-			pthread_mutex_lock(&data->print_mutex);
+			usleep(10);
+
+			pthread_mutex_lock(&data->someone_died_mutex);
 			if (!data->someone_died &&
 				(get_time_ms() - ph->last_meal) >= data->time_to_die)
 			{
 				data->someone_died = 1;
 				printf("%ld %d died\n", get_time_ms() - data->start_time, ph->id);
-				pthread_mutex_unlock(&data->print_mutex);
+				pthread_mutex_unlock(&data->someone_died_mutex);
 				return NULL;
 			}
 			if (data->must_eat > 0 && ph->eat_count >= data->must_eat)
 				full++;
-			pthread_mutex_unlock(&data->print_mutex);
+			pthread_mutex_unlock(&data->someone_died_mutex);
 			i++;
 		}
 		if (data->must_eat > 0 && full == data->number_of_philosophers)
 		{
-			pthread_mutex_lock(&data->print_mutex);
+			pthread_mutex_lock(&data->someone_died_mutex);
 			data->someone_died = 1; // Simülasyonu durdurmak için
-			pthread_mutex_unlock(&data->print_mutex);
+			pthread_mutex_unlock(&data->someone_died_mutex);
 			return NULL;
 		}
 		usleep(1000);

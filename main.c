@@ -15,9 +15,28 @@
 int ft_atoi(const char *str)
 {
     int res = 0;
+	int sign = 1;
+	if (*str == '-')
+	{
+		sign = -1;
+		str++;
+	}
     while(*str >= '0' && *str <= '9')
         res = (res * 10) + (*str++ - '0');
-    return(res);
+    return(res * sign);
+}
+
+int is_valid_number(char *str)
+{
+	if (*str == '-')
+		str++;
+    while (*str)
+    {
+        if (*str < '0' || *str > '9')
+            return (0);
+        str++;
+    }
+    return (1);
 }
 
 int init_data(t_data *data, int ac, char **av)
@@ -40,6 +59,7 @@ int init_data(t_data *data, int ac, char **av)
     for (int i = 0; i < data->number_of_philosophers; i++)
 		pthread_mutex_init(&data->forks[i], NULL);
 	pthread_mutex_init(&data->print_mutex, NULL);
+	pthread_mutex_init(&data->someone_died_mutex, NULL);
 	return (0);
 }
 
@@ -63,8 +83,11 @@ void	start_simulation(t_data *data)
 	
 	// Monitor thread başlat
 	pthread_t monitor_thread;
-	pthread_create(&monitor_thread, NULL, &monitor, data);
-	pthread_join(monitor_thread, NULL); // Ölüm olunca beklemeyi bitir
+	if (data->number_of_philosophers > 1)
+	{
+		pthread_create(&monitor_thread, NULL, &monitor, data);
+		pthread_join(monitor_thread, NULL); // Ölüm olunca beklemeyi bitir
+	}
 }
 
 
@@ -85,6 +108,27 @@ int main(int argc, char **argv)
 
 	if (argc != 5 && argc != 6)
 		return (printf("Error: wrong number of arguments\n"), 1);
+
+	for (int i = 1; i < argc; i++)
+	{
+		if (!is_valid_number(argv[i]))
+			return (printf("Error: invalid arguments\n"), 1);
+	}
+
+	data.number_of_philosophers = ft_atoi(argv[1]);
+	if (data.number_of_philosophers == 0)
+		return (printf("Error: invalid arguments\n"), 1);
+	data.time_to_die = ft_atoi(argv[2]);
+	data.time_to_eat = ft_atoi(argv[3]);
+	data.time_to_sleep = ft_atoi(argv[4]);
+	if (argc == 6)
+		data.must_eat = ft_atoi(argv[5]);
+	else
+		data.must_eat = -1;
+	
+	if (data.time_to_die == 0 || data.time_to_eat == 0 || data.time_to_sleep == 0)
+		return (printf("Error: invalid arguments\n"), 1);
+
 	if (init_data(&data, argc, argv))
 		return (printf("Error: memory allocation failed\n"), 1);
 	start_simulation(&data);
