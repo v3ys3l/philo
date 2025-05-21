@@ -57,7 +57,10 @@ int init_data(t_data *data, int ac, char **av)
         return(1);
 
     for (int i = 0; i < data->number_of_philosophers; i++)
+	{
 		pthread_mutex_init(&data->forks[i], NULL);
+		pthread_mutex_init(&data->philos[i].eat_count_mutex, NULL);
+	}
 	pthread_mutex_init(&data->print_mutex, NULL);
 	pthread_mutex_init(&data->someone_died_mutex, NULL);
 	return (0);
@@ -96,8 +99,12 @@ void	join_and_destroy(t_data *data)
 	for (int i = 0; i < data->number_of_philosophers; i++)
 		pthread_join(data->philos[i].thread, NULL);
 	for (int i = 0; i < data->number_of_philosophers; i++)
+	{
 		pthread_mutex_destroy(&data->forks[i]);
+		pthread_mutex_destroy(&data->philos[i].eat_count_mutex);
+	}
 	pthread_mutex_destroy(&data->print_mutex);
+	pthread_mutex_destroy(&data->someone_died_mutex);
 	free(data->philos);
 	free(data->forks);
 }
@@ -114,20 +121,6 @@ int main(int argc, char **argv)
 		if (!is_valid_number(argv[i]))
 			return (printf("Error: invalid arguments\n"), 1);
 	}
-
-	data.number_of_philosophers = ft_atoi(argv[1]);
-	if (data.number_of_philosophers == 0)
-		return (printf("Error: invalid arguments\n"), 1);
-	data.time_to_die = ft_atoi(argv[2]);
-	data.time_to_eat = ft_atoi(argv[3]);
-	data.time_to_sleep = ft_atoi(argv[4]);
-	if (argc == 6)
-		data.must_eat = ft_atoi(argv[5]);
-	else
-		data.must_eat = -1;
-	
-	if (data.time_to_die == 0 || data.time_to_eat == 0 || data.time_to_sleep == 0)
-		return (printf("Error: invalid arguments\n"), 1);
 
 	if (init_data(&data, argc, argv))
 		return (printf("Error: memory allocation failed\n"), 1);

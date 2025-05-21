@@ -24,6 +24,7 @@ typedef struct s_data t_data;
 typedef struct s_philo {
     int             id;
     int             eat_count;
+    pthread_mutex_t eat_count_mutex;
     long            last_meal;
     pthread_t       thread;
     pthread_mutex_t *left_fork;

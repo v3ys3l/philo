@@ -13,40 +13,42 @@
 #include "utils.h"
 #include <string.h>
 
-long get_time_ms(void)
-{
+long get_time_ms(void) {
     struct timeval tv;
-    
-    gettimeofday(&tv,NULL);
-    return((tv.tv_sec *1000) + (tv.tv_usec / 1000));
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000); // Convert seconds + microseconds to milliseconds
 }
 
-void smart_sleep(long time)
-{
+#include <time.h>
+
+void smart_sleep(long time) {
+    struct timespec req;
     long start = get_time_ms();
-    while ((get_time_ms() - start) < time)
-        usleep(100);
+    long remaining;
+
+    while ((remaining = time - (get_time_ms() - start)) > 0) {
+        req.tv_sec = 0;
+        req.tv_nsec = remaining * 1000000; // Convert milliseconds to nanoseconds
+        nanosleep(&req, NULL);
+    }
 }
 
-void print_action(t_philo *philo, char *action)
-{
+void print_action(t_philo *philo, char *action) {
     long time;
 
     pthread_mutex_lock(&philo->data->print_mutex);
-	pthread_mutex_lock(&philo->data->someone_died_mutex);
     time = get_time_ms() - philo->data->start_time;
-    if(!philo->data->someone_died) {
-		if (strcmp(action, "is thinking") == 0)
-			printf("%ld %d \033[34mis thinking\033[0m\n", time, philo->id);
-		else if (strcmp(action, "has taken a fork") == 0)
-			printf("%ld %d \033[32mhas taken a fork\033[0m\n", time, philo->id);
-		else if (strcmp(action, "is eating") == 0)
-			printf("%ld %d \033[33mis eating\033[0m\n", time, philo->id);
-		else if (strcmp(action, "is sleeping") == 0)
-			printf("%ld %d \033[35mis sleeping\033[0m\n", time, philo->id);
-		else
-        	printf("%ld %d %s\n", time, philo->id, action);
-	}
-	pthread_mutex_unlock(&philo->data->someone_died_mutex);
+    if (!philo->data->someone_died) {
+        if (strcmp(action, "is thinking") == 0)
+            printf("%ld %d \033[34mis thinking\033[0m\n", time, philo->id);
+        else if (strcmp(action, "has taken a fork") == 0)
+            printf("%ld %d \033[32mhas taken a fork\033[0m\n", time, philo->id);
+        else if (strcmp(action, "is eating") == 0)
+            printf("%ld %d \033[33mis eating\033[0m\n", time, philo->id);
+        else if (strcmp(action, "is sleeping") == 0)
+            printf("%ld %d \033[35mis sleeping\033[0m\n", time, philo->id);
+        else
+            printf("%ld %d %s\n", time, philo->id, action);
+    }
     pthread_mutex_unlock(&philo->data->print_mutex);
 }

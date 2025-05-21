@@ -45,13 +45,16 @@ void *philo_life(void *arg)
 
 		print_action(ph, "is thinking");
 
-		if (ph->id % 2 == 0) {
+		if (ph->id % 2 == 0)
+		{
 			pthread_mutex_lock(ph->right_fork);
 			print_action(ph, "has taken a fork");
 
 			pthread_mutex_lock(ph->left_fork);
 			print_action(ph, "has taken a fork");
-		} else {
+		}
+		else
+		{
 			pthread_mutex_lock(ph->left_fork);
 			print_action(ph, "has taken a fork");
 
@@ -69,7 +72,18 @@ void *philo_life(void *arg)
 		pthread_mutex_unlock(ph->right_fork);
 		pthread_mutex_unlock(ph->left_fork);
 
+		pthread_mutex_lock(&ph->data->someone_died_mutex);
+		if (!ph->data->someone_died && (get_time_ms() - ph->last_meal) >= ph->data->time_to_die) {
+			ph->data->someone_died = 1;
+			printf("%ld %d died\n", get_time_ms() - ph->data->start_time, ph->id);
+			pthread_mutex_unlock(&ph->data->someone_died_mutex);
+			return NULL;
+		}
+		pthread_mutex_unlock(&ph->data->someone_died_mutex);
+
+		pthread_mutex_lock(&ph->eat_count_mutex);
 		ph->eat_count++;
+		pthread_mutex_unlock(&ph->eat_count_mutex);
 		if (ph->data->must_eat > 0 && ph->eat_count >= ph->data->must_eat)
 			break;
 
@@ -105,13 +119,14 @@ void *monitor(void *arg)
 				pthread_mutex_unlock(&data->someone_died_mutex);
 				return NULL;
 			}
+			pthread_mutex_lock(&ph->eat_count_mutex);
 			if (data->must_eat > 0 && ph->eat_count >= data->must_eat)
 				full++;
+			pthread_mutex_unlock(&ph->eat_count_mutex);
 			pthread_mutex_unlock(&data->someone_died_mutex);
 			i++;
 		}
-		if (data->must_eat > 0 && full == data->number_of_philosophers)
-		{
+		if (data->must_eat > 0 && full == data->number_of_philosophers) {
 			pthread_mutex_lock(&data->someone_died_mutex);
 			data->someone_died = 1; // Simülasyonu durdurmak için
 			pthread_mutex_unlock(&data->someone_died_mutex);
