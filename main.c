@@ -6,28 +6,11 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:30:01 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/21 12:49:09 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
-
-int	ft_atoi(const char *str)
-{
-	int	res;
-	int	sign;
-
-	res = 0;
-	sign = 1;
-	if (*str == '-')
-	{
-		sign = -1;
-		str++;
-	}
-	while (*str >= '0' && *str <= '9')
-		res = (res * 10) + (*str++ - '0');
-	return (res * sign);
-}
 
 int	is_valid_number(char *str)
 {
@@ -80,7 +63,8 @@ void	start_simulation(t_data *data)
 	pthread_t	monitor_thread;
 
 	data->start_time = get_time_ms();
-	for (i = 0; i < data->number_of_philosophers; i++)
+	i = 0;
+	while (i < data->number_of_philosophers)
 	{
 		ph = &data->philos[i];
 		ph->id = i + 1;
@@ -91,23 +75,32 @@ void	start_simulation(t_data *data)
 		ph->right_fork = &data->forks[(i + 1) % data->number_of_philosophers];
 		pthread_create(&ph->thread, NULL, &philo_life, ph);
 		usleep(100);
+		i++;
 	}
-	// Monitor thread başlat
 	if (data->number_of_philosophers > 1)
 	{
 		pthread_create(&monitor_thread, NULL, &monitor, data);
-		pthread_join(monitor_thread, NULL); // Ölüm olunca beklemeyi bitir
+		pthread_join(monitor_thread, NULL);
 	}
 }
 
 void	join_and_destroy(t_data *data)
 {
-	for (int i = 0; i < data->number_of_philosophers; i++)
+	int	i;
+
+	i = 0;
+	while (i < data->number_of_philosophers)
+	{
 		pthread_join(data->philos[i].thread, NULL);
-	for (int i = 0; i < data->number_of_philosophers; i++)
+		i++;
+	}
+	i = 0;
+	while (i < data->number_of_philosophers)
 	{
 		pthread_mutex_destroy(&data->forks[i]);
 		pthread_mutex_destroy(&data->philos[i].eat_count_mutex);
+		pthread_mutex_destroy(&data->philos[i].last_meal_mutex);
+		i++;
 	}
 	pthread_mutex_destroy(&data->print_mutex);
 	pthread_mutex_destroy(&data->someone_died_mutex);
@@ -118,13 +111,16 @@ void	join_and_destroy(t_data *data)
 int	main(int argc, char **argv)
 {
 	t_data	data;
+	int		i;
 
 	if (argc != 5 && argc != 6)
 		return (printf("Error: wrong number of arguments\n"), 1);
-	for (int i = 1; i < argc; i++)
+	i = 1;
+	while (i < argc)
 	{
 		if (!is_valid_number(argv[i]))
 			return (printf("Error: invalid arguments\n"), 1);
+		i++;
 	}
 	if (init_data(&data, argc, argv))
 		return (printf("Error: memory allocation failed\n"), 1);

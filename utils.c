@@ -6,23 +6,21 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:05:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:30:13 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/21 12:45:07 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 #include <string.h>
+#include <time.h>
 
 long	get_time_ms(void)
 {
 	struct timeval	tv;
 
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000) + (tv.tv_usec / 1000); // Convert seconds
-		+ microseconds to milliseconds
+	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
-
-#include <time.h>
 
 void	smart_sleep(long time)
 {
@@ -31,12 +29,13 @@ void	smart_sleep(long time)
 	long			remaining;
 
 	start = get_time_ms();
-	while ((remaining = time - (get_time_ms() - start)) > 0)
+	remaining = time - (get_time_ms() - start);
+	while (remaining > 0)
 	{
 		req.tv_sec = 0;
 		req.tv_nsec = remaining * 1000000;
-			// Convert milliseconds to nanoseconds
 		nanosleep(&req, NULL);
+		remaining = time - (get_time_ms() - start);
 	}
 }
 
@@ -44,11 +43,8 @@ void	print_action(t_philo *philo, char *action)
 {
 	long	time;
 
-	// İlk olarak someone_died_mutex'i kilitle
 	pthread_mutex_lock(&philo->data->someone_died_mutex);
-	// Sonrasında print_mutex'i kilitle
 	pthread_mutex_lock(&philo->data->print_mutex);
-	// Eğer someone_died işaretlenmemişse, ekran çıktısını yazdır
 	if (!philo->data->someone_died)
 	{
 		time = get_time_ms() - philo->data->start_time;
@@ -63,7 +59,23 @@ void	print_action(t_philo *philo, char *action)
 		else
 			printf("%ld %d %s\n", time, philo->id, action);
 	}
-	// Mutex'leri sırasıyla serbest bırak
 	pthread_mutex_unlock(&philo->data->print_mutex);
 	pthread_mutex_unlock(&philo->data->someone_died_mutex);
+}
+
+int	ft_atoi(const char *str)
+{
+	int	res;
+	int	sign;
+
+	res = 0;
+	sign = 1;
+	if (*str == '-')
+	{
+		sign = -1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+		res = (res * 10) + (*str++ - '0');
+	return (res * sign);
 }

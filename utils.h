@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:03:25 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:30:15 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/21 12:45:17 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,5 +18,6 @@
 long	get_time_ms(void);
 void	smart_sleep(long time);
 void	print_action(t_philo *philo, char *action);
+int		ft_atoi(const char *str);
 
 #endif

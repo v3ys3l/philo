@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:30:08 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/21 12:43:14 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	*philo_life(void *arg)
 			pthread_mutex_lock(ph->right_fork);
 			print_action(ph, "has taken a fork");
 		}
-		pthread_mutex_lock(&ph->last_meal_mutex); // ✅ last_meal koruması
+		pthread_mutex_lock(&ph->last_meal_mutex);
 		ph->last_meal = get_time_ms();
 		pthread_mutex_unlock(&ph->last_meal_mutex);
 		print_action(ph, "is eating");
@@ -64,7 +64,7 @@ void	*philo_life(void *arg)
 		pthread_mutex_unlock(ph->right_fork);
 		pthread_mutex_unlock(ph->left_fork);
 		pthread_mutex_lock(&ph->data->someone_died_mutex);
-		pthread_mutex_lock(&ph->last_meal_mutex); // ✅ Okuma da korumalı
+		pthread_mutex_lock(&ph->last_meal_mutex);
 		if (!ph->data->someone_died && (get_time_ms()
 				- ph->last_meal) >= ph->data->time_to_die)
 		{
@@ -106,7 +106,7 @@ void	*monitor(void *arg)
 			ph = &data->philos[i];
 			usleep(10);
 			pthread_mutex_lock(&data->someone_died_mutex);
-			pthread_mutex_lock(&ph->last_meal_mutex); // ✅ Okuma korumalı
+			pthread_mutex_lock(&ph->last_meal_mutex);
 			time_since_meal = get_time_ms() - ph->last_meal;
 			pthread_mutex_unlock(&ph->last_meal_mutex);
 			if (!data->someone_died && time_since_meal >= data->time_to_die)
@@ -127,7 +127,7 @@ void	*monitor(void *arg)
 		if (data->must_eat > 0 && full == data->number_of_philosophers)
 		{
 			pthread_mutex_lock(&data->someone_died_mutex);
-			data->someone_died = 1; // Simülasyonu durdurmak için
+			data->someone_died = 1;
 			pthread_mutex_unlock(&data->someone_died_mutex);
 			return (NULL);
 		}
