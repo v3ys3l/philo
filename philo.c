@@ -6,50 +6,46 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/12 20:19:44 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/21 12:30:08 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
 
-void *philo_life(void *arg)
+void	*philo_life(void *arg)
 {
-	t_philo *ph = (t_philo *)arg;
+	t_philo	*ph;
 
+	ph = (t_philo *)arg;
 	if (ph->id % 2 == 0)
 		usleep(100);
-
 	if (ph->data->number_of_philosophers == 1)
 	{
 		print_action(ph, "is thinking");
 		pthread_mutex_lock(ph->left_fork);
 		print_action(ph, "has taken a fork");
 		smart_sleep(ph->data->time_to_die);
-
 		pthread_mutex_lock(&ph->data->someone_died_mutex);
 		ph->data->someone_died = 1;
 		printf("%ld %d died\n", get_time_ms() - ph->data->start_time, ph->id);
 		pthread_mutex_unlock(&ph->data->someone_died_mutex);
 		pthread_mutex_unlock(ph->left_fork);
-		return NULL;
+		return (NULL);
 	}
-
 	while (1)
 	{
 		pthread_mutex_lock(&ph->data->someone_died_mutex);
-		if (ph->data->someone_died) {
+		if (ph->data->someone_died)
+		{
 			pthread_mutex_unlock(&ph->data->someone_died_mutex);
-			break;
+			break ;
 		}
 		pthread_mutex_unlock(&ph->data->someone_died_mutex);
-
 		print_action(ph, "is thinking");
-
 		if (ph->id % 2 == 0)
 		{
 			pthread_mutex_lock(ph->right_fork);
 			print_action(ph, "has taken a fork");
-
 			pthread_mutex_lock(ph->left_fork);
 			print_action(ph, "has taken a fork");
 		}
@@ -57,67 +53,69 @@ void *philo_life(void *arg)
 		{
 			pthread_mutex_lock(ph->left_fork);
 			print_action(ph, "has taken a fork");
-
 			pthread_mutex_lock(ph->right_fork);
 			print_action(ph, "has taken a fork");
 		}
-
-		pthread_mutex_lock(&ph->data->print_mutex);
+		pthread_mutex_lock(&ph->last_meal_mutex); // ✅ last_meal koruması
 		ph->last_meal = get_time_ms();
-		pthread_mutex_unlock(&ph->data->print_mutex);
-
+		pthread_mutex_unlock(&ph->last_meal_mutex);
 		print_action(ph, "is eating");
 		smart_sleep(ph->data->time_to_eat);
-
 		pthread_mutex_unlock(ph->right_fork);
 		pthread_mutex_unlock(ph->left_fork);
-
 		pthread_mutex_lock(&ph->data->someone_died_mutex);
-		if (!ph->data->someone_died && (get_time_ms() - ph->last_meal) >= ph->data->time_to_die) {
+		pthread_mutex_lock(&ph->last_meal_mutex); // ✅ Okuma da korumalı
+		if (!ph->data->someone_died && (get_time_ms()
+				- ph->last_meal) >= ph->data->time_to_die)
+		{
 			ph->data->someone_died = 1;
-			printf("%ld %d died\n", get_time_ms() - ph->data->start_time, ph->id);
+			pthread_mutex_unlock(&ph->last_meal_mutex);
+			printf("%ld %d died\n", get_time_ms() - ph->data->start_time,
+				ph->id);
 			pthread_mutex_unlock(&ph->data->someone_died_mutex);
-			return NULL;
+			return (NULL);
 		}
+		pthread_mutex_unlock(&ph->last_meal_mutex);
 		pthread_mutex_unlock(&ph->data->someone_died_mutex);
-
 		pthread_mutex_lock(&ph->eat_count_mutex);
 		ph->eat_count++;
 		pthread_mutex_unlock(&ph->eat_count_mutex);
 		if (ph->data->must_eat > 0 && ph->eat_count >= ph->data->must_eat)
-			break;
-
+			break ;
 		print_action(ph, "is sleeping");
 		smart_sleep(ph->data->time_to_sleep);
 	}
-	return NULL;
+	return (NULL);
 }
 
-
-void *monitor(void *arg)
+void	*monitor(void *arg)
 {
-	t_data *data = (t_data *)arg;
-	int i;
-	int full;
+	t_data	*data;
+	int		i;
+	int		full;
+	t_philo	*ph;
+	long	time_since_meal;
 
+	data = (t_data *)arg;
 	while (1)
 	{
 		i = 0;
 		full = 0;
 		while (i < data->number_of_philosophers)
 		{
-			t_philo *ph = &data->philos[i];
-
+			ph = &data->philos[i];
 			usleep(10);
-
 			pthread_mutex_lock(&data->someone_died_mutex);
-			if (!data->someone_died &&
-				(get_time_ms() - ph->last_meal) >= data->time_to_die)
+			pthread_mutex_lock(&ph->last_meal_mutex); // ✅ Okuma korumalı
+			time_since_meal = get_time_ms() - ph->last_meal;
+			pthread_mutex_unlock(&ph->last_meal_mutex);
+			if (!data->someone_died && time_since_meal >= data->time_to_die)
 			{
 				data->someone_died = 1;
-				printf("%ld %d died\n", get_time_ms() - data->start_time, ph->id);
+				printf("%ld %d died\n", get_time_ms() - data->start_time,
+					ph->id);
 				pthread_mutex_unlock(&data->someone_died_mutex);
-				return NULL;
+				return (NULL);
 			}
 			pthread_mutex_lock(&ph->eat_count_mutex);
 			if (data->must_eat > 0 && ph->eat_count >= data->must_eat)
@@ -126,13 +124,14 @@ void *monitor(void *arg)
 			pthread_mutex_unlock(&data->someone_died_mutex);
 			i++;
 		}
-		if (data->must_eat > 0 && full == data->number_of_philosophers) {
+		if (data->must_eat > 0 && full == data->number_of_philosophers)
+		{
 			pthread_mutex_lock(&data->someone_died_mutex);
 			data->someone_died = 1; // Simülasyonu durdurmak için
 			pthread_mutex_unlock(&data->someone_died_mutex);
-			return NULL;
+			return (NULL);
 		}
 		usleep(1000);
 	}
-	return NULL;
+	return (NULL);
 }
