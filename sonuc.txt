@@ -1,0 +1,5 @@
+argğman olarak 0 verince çalışıyo Hatalı
+
+    argüman olarak negatif sayı veriyom çalışıyo Hata
+
+    thinkle başlamicak.

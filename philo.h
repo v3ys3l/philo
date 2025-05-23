@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 00:59:41 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:30:10 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/24 00:41:44 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,10 @@ struct					s_data
 	long				time_to_eat;
 	long				time_to_sleep;
 	int					must_eat;
-
+	int					start_flag;
 	long				start_time;
 	int					someone_died;
-
+	pthread_mutex_t		start_lock;
 	pthread_mutex_t		*forks;
 	pthread_mutex_t		print_mutex;
 	pthread_mutex_t		someone_died_mutex;
@@ -54,5 +54,7 @@ struct					s_data
 
 void					*monitor(void *arg);
 void					*philo_life(void *arg);
+
+int						is_someone_died(t_data *data);
 
 #endif

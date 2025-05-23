@@ -1,7 +1,7 @@
 NAME = philo
 
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=thread -pthread
+CC = cc
+CFLAGS = -Wall -Wextra -Werror
 
 SRC = main.c philo.c utils.c
 OBJ = $(SRC:.c=.o)

@@ -6,22 +6,46 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:43:14 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/24 00:34:14 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
+
+int	is_someone_died(t_data *data)
+{
+	int	state;
+
+	pthread_mutex_lock(&data->someone_died_mutex);
+	state = data->someone_died;
+	pthread_mutex_unlock(&data->someone_died_mutex);
+	return (state);
+}
+
+int	get_simulation_state(t_data *data)
+{
+	int	state;
+
+	pthread_mutex_lock(&data->start_lock);
+	state = data->start_flag;
+	pthread_mutex_unlock(&data->start_lock);
+	return (state);
+}
 
 void	*philo_life(void *arg)
 {
 	t_philo	*ph;
 
 	ph = (t_philo *)arg;
+	while (get_simulation_state(ph->data) != 1)
+		;
+	pthread_mutex_lock(&ph->last_meal_mutex);
+	ph->last_meal = get_time_ms();
+	pthread_mutex_unlock(&ph->last_meal_mutex);
 	if (ph->id % 2 == 0)
-		usleep(100);
+		smart_sleep(1);
 	if (ph->data->number_of_philosophers == 1)
 	{
-		print_action(ph, "is thinking");
 		pthread_mutex_lock(ph->left_fork);
 		print_action(ph, "has taken a fork");
 		smart_sleep(ph->data->time_to_die);
@@ -34,14 +58,6 @@ void	*philo_life(void *arg)
 	}
 	while (1)
 	{
-		pthread_mutex_lock(&ph->data->someone_died_mutex);
-		if (ph->data->someone_died)
-		{
-			pthread_mutex_unlock(&ph->data->someone_died_mutex);
-			break ;
-		}
-		pthread_mutex_unlock(&ph->data->someone_died_mutex);
-		print_action(ph, "is thinking");
 		if (ph->id % 2 == 0)
 		{
 			pthread_mutex_lock(ph->right_fork);
@@ -61,22 +77,18 @@ void	*philo_life(void *arg)
 		pthread_mutex_unlock(&ph->last_meal_mutex);
 		print_action(ph, "is eating");
 		smart_sleep(ph->data->time_to_eat);
-		pthread_mutex_unlock(ph->right_fork);
-		pthread_mutex_unlock(ph->left_fork);
-		pthread_mutex_lock(&ph->data->someone_died_mutex);
-		pthread_mutex_lock(&ph->last_meal_mutex);
-		if (!ph->data->someone_died && (get_time_ms()
-				- ph->last_meal) >= ph->data->time_to_die)
+		if (ph->id % 2 == 0)
 		{
-			ph->data->someone_died = 1;
-			pthread_mutex_unlock(&ph->last_meal_mutex);
-			printf("%ld %d died\n", get_time_ms() - ph->data->start_time,
-				ph->id);
-			pthread_mutex_unlock(&ph->data->someone_died_mutex);
-			return (NULL);
+			pthread_mutex_unlock(ph->right_fork);
+			pthread_mutex_unlock(ph->left_fork);
 		}
-		pthread_mutex_unlock(&ph->last_meal_mutex);
-		pthread_mutex_unlock(&ph->data->someone_died_mutex);
+		else
+		{
+			pthread_mutex_unlock(ph->left_fork);
+			pthread_mutex_unlock(ph->right_fork);
+		}
+		if (is_someone_died(ph->data))
+			return (NULL);
 		pthread_mutex_lock(&ph->eat_count_mutex);
 		ph->eat_count++;
 		pthread_mutex_unlock(&ph->eat_count_mutex);
@@ -84,6 +96,13 @@ void	*philo_life(void *arg)
 			break ;
 		print_action(ph, "is sleeping");
 		smart_sleep(ph->data->time_to_sleep);
+		if (is_someone_died(ph->data))
+			return (NULL);
+		print_action(ph, "is thinking");
+		if ((ph->data->time_to_die - (ph->data->time_to_eat + ph->data->time_to_sleep)) / 2 != 0)
+			smart_sleep((ph->data->time_to_die - (ph->data->time_to_eat + ph->data->time_to_sleep)) / 2);
+		if (is_someone_died(ph->data))
+			return (NULL);
 	}
 	return (NULL);
 }
@@ -97,6 +116,11 @@ void	*monitor(void *arg)
 	long	time_since_meal;
 
 	data = (t_data *)arg;
+	smart_sleep(100);
+	pthread_mutex_lock(&data->start_lock);
+	data->start_flag = 1;
+	pthread_mutex_unlock(&data->start_lock);
+	data->start_time = get_time_ms();
 	while (1)
 	{
 		i = 0;
@@ -104,7 +128,6 @@ void	*monitor(void *arg)
 		while (i < data->number_of_philosophers)
 		{
 			ph = &data->philos[i];
-			usleep(10);
 			pthread_mutex_lock(&data->someone_died_mutex);
 			pthread_mutex_lock(&ph->last_meal_mutex);
 			time_since_meal = get_time_ms() - ph->last_meal;
@@ -131,7 +154,6 @@ void	*monitor(void *arg)
 			pthread_mutex_unlock(&data->someone_died_mutex);
 			return (NULL);
 		}
-		usleep(1000);
 	}
 	return (NULL);
 }

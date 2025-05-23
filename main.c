@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/21 12:49:09 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/24 00:01:31 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ int	init_data(t_data *data, int ac, char **av)
 		data->must_eat = ft_atoi(av[5]);
 	else
 		data->must_eat = -1;
+	//0 ve aşağısını burda hallet.
 	data->someone_died = 0;
 	data->forks = malloc(sizeof(pthread_mutex_t)
 			* data->number_of_philosophers);
@@ -51,6 +52,7 @@ int	init_data(t_data *data, int ac, char **av)
 		pthread_mutex_init(&data->philos[i].last_meal_mutex, NULL);
 		i++;
 	}
+	pthread_mutex_init(&data->start_lock, NULL);
 	pthread_mutex_init(&data->print_mutex, NULL);
 	pthread_mutex_init(&data->someone_died_mutex, NULL);
 	return (0);
@@ -62,6 +64,7 @@ void	start_simulation(t_data *data)
 	t_philo		*ph;
 	pthread_t	monitor_thread;
 
+	data->start_flag = 0;
 	data->start_time = get_time_ms();
 	i = 0;
 	while (i < data->number_of_philosophers)
@@ -74,7 +77,6 @@ void	start_simulation(t_data *data)
 		ph->left_fork = &data->forks[i];
 		ph->right_fork = &data->forks[(i + 1) % data->number_of_philosophers];
 		pthread_create(&ph->thread, NULL, &philo_life, ph);
-		usleep(100);
 		i++;
 	}
 	if (data->number_of_philosophers > 1)
