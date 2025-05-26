@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/24 00:34:14 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/26 15:10:42 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void	*philo_life(void *arg)
 			return (NULL);
 		print_action(ph, "is thinking");
 		if ((ph->data->time_to_die - (ph->data->time_to_eat + ph->data->time_to_sleep)) / 2 != 0)
-			smart_sleep((ph->data->time_to_die - (ph->data->time_to_eat + ph->data->time_to_sleep)) / 2);
+			smart_sleep((ph->data->time_to_die - (ph->data->time_to_eat + ph->data->time_to_sleep)) / 2);//bunu araştır zaman kaymması oluyor
 		if (is_someone_died(ph->data))
 			return (NULL);
 	}

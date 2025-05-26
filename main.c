@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/24 00:01:31 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/26 15:20:38 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,12 @@ int	init_data(t_data *data, int ac, char **av)
 	else
 		data->must_eat = -1;
 	//0 ve aşağısını burda hallet.
+	if(data->time_to_eat <= 0 || data->time_to_eat <= 0 || data->time_to_sleep <= 0 || data->number_of_philosophers <= 0)
+	{
+		printf("ERROR: Wrong argument!");
+		return(1);
+	}
+		
 	data->someone_died = 0;
 	data->forks = malloc(sizeof(pthread_mutex_t)
 			* data->number_of_philosophers);
@@ -66,6 +72,7 @@ void	start_simulation(t_data *data)
 
 	data->start_flag = 0;
 	data->start_time = get_time_ms();
+
 	i = 0;
 	while (i < data->number_of_philosophers)
 	{
@@ -76,7 +83,8 @@ void	start_simulation(t_data *data)
 		ph->data = data;
 		ph->left_fork = &data->forks[i];
 		ph->right_fork = &data->forks[(i + 1) % data->number_of_philosophers];
-		pthread_create(&ph->thread, NULL, &philo_life, ph);
+		
+		pthread_create(&ph->thread, NULL, &philo_life, ph); // if bloguna hata kontrolü
 		i++;
 	}
 	if (data->number_of_philosophers > 1)
@@ -112,12 +120,15 @@ void	join_and_destroy(t_data *data)
 
 int	main(int argc, char **argv)
 {
+	if(argv[1][0] <= '2')
+		printf("31");
 	t_data	data;
 	int		i;
 
 	if (argc != 5 && argc != 6)
 		return (printf("Error: wrong number of arguments\n"), 1);
 	i = 1;
+
 	while (i < argc)
 	{
 		if (!is_valid_number(argv[i]))
