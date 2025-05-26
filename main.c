@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/26 15:20:38 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/26 16:21:45 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	start_simulation(t_data *data)
 		ph->left_fork = &data->forks[i];
 		ph->right_fork = &data->forks[(i + 1) % data->number_of_philosophers];
 		
-		pthread_create(&ph->thread, NULL, &philo_life, ph); // if bloguna hata kontrolü
+		pthread_create(&ph->thread, NULL, &philo_life, ph); // if bloguna sok hata kontrolü
 		i++;
 	}
 	if (data->number_of_philosophers > 1)
@@ -120,8 +120,6 @@ void	join_and_destroy(t_data *data)
 
 int	main(int argc, char **argv)
 {
-	if(argv[1][0] <= '2')
-		printf("31");
 	t_data	data;
 	int		i;
 

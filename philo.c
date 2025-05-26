@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/26 15:10:42 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/26 16:24:57 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,19 @@ int	get_simulation_state(t_data *data)
 {
 	int	state;
 
-	pthread_mutex_lock(&data->start_lock);
-	state = data->start_flag;
-	pthread_mutex_unlock(&data->start_lock);
-	return (state);
+
+	if(data->number_of_philosophers == 1)
+	{
+		data->start_time = get_time_ms();
+		state = 1;
+	}
+	else
+	{
+		pthread_mutex_lock(&data->start_lock);
+		state = data->start_flag;
+		pthread_mutex_unlock(&data->start_lock);
+	}
+		return (state);
 }
 
 void	*philo_life(void *arg)
@@ -109,6 +118,7 @@ void	*philo_life(void *arg)
 
 void	*monitor(void *arg)
 {
+
 	t_data	*data;
 	int		i;
 	int		full;
