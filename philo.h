@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 00:59:41 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/24 00:41:44 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/31 19:29:57 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,9 @@ struct					s_data
 
 void					*monitor(void *arg);
 void					*philo_life(void *arg);
+int						init_data(t_data *data, int ac, char **av);
 
 int						is_someone_died(t_data *data);
-
+int						philo_start(t_philo *ph);
+int						parse_arguments(t_data *data, int ac, char **av);
 #endif

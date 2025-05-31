@@ -6,7 +6,7 @@
 /*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/26 16:21:45 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/05/31 19:22:24 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,8 @@ int	is_valid_number(char *str)
 	return (1);
 }
 
-int	init_data(t_data *data, int ac, char **av)
+int	parse_arguments(t_data *data, int ac, char **av)
 {
-	int	i;
-
 	data->number_of_philosophers = ft_atoi(av[1]);
 	data->time_to_die = ft_atoi(av[2]);
 	data->time_to_eat = ft_atoi(av[3]);
@@ -37,30 +35,12 @@ int	init_data(t_data *data, int ac, char **av)
 		data->must_eat = ft_atoi(av[5]);
 	else
 		data->must_eat = -1;
-	//0 ve aşağısını burda hallet.
-	if(data->time_to_eat <= 0 || data->time_to_eat <= 0 || data->time_to_sleep <= 0 || data->number_of_philosophers <= 0)
+	if (data->time_to_die <= 0 || data->time_to_eat <= 0
+		|| data->time_to_sleep <= 0 || data->number_of_philosophers <= 0)
 	{
-		printf("ERROR: Wrong argument!");
-		return(1);
-	}
-		
-	data->someone_died = 0;
-	data->forks = malloc(sizeof(pthread_mutex_t)
-			* data->number_of_philosophers);
-	data->philos = malloc(sizeof(t_philo) * data->number_of_philosophers);
-	if (!data->forks || !data->philos)
+		printf("ERROR: Wrong argument!\n");
 		return (1);
-	i = 0;
-	while (i < data->number_of_philosophers)
-	{
-		pthread_mutex_init(&data->forks[i], NULL);
-		pthread_mutex_init(&data->philos[i].eat_count_mutex, NULL);
-		pthread_mutex_init(&data->philos[i].last_meal_mutex, NULL);
-		i++;
 	}
-	pthread_mutex_init(&data->start_lock, NULL);
-	pthread_mutex_init(&data->print_mutex, NULL);
-	pthread_mutex_init(&data->someone_died_mutex, NULL);
 	return (0);
 }
 
@@ -72,7 +52,6 @@ void	start_simulation(t_data *data)
 
 	data->start_flag = 0;
 	data->start_time = get_time_ms();
-
 	i = 0;
 	while (i < data->number_of_philosophers)
 	{
@@ -83,8 +62,8 @@ void	start_simulation(t_data *data)
 		ph->data = data;
 		ph->left_fork = &data->forks[i];
 		ph->right_fork = &data->forks[(i + 1) % data->number_of_philosophers];
-		
-		pthread_create(&ph->thread, NULL, &philo_life, ph); // if bloguna sok hata kontrolü
+		if (pthread_create(&ph->thread, NULL, &philo_life, ph))
+			printf("Error: Pthread_create");
 		i++;
 	}
 	if (data->number_of_philosophers > 1)
@@ -126,7 +105,6 @@ int	main(int argc, char **argv)
 	if (argc != 5 && argc != 6)
 		return (printf("Error: wrong number of arguments\n"), 1);
 	i = 1;
-
 	while (i < argc)
 	{
 		if (!is_valid_number(argv[i]))
