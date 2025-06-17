@@ -3,14 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   philo.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:18:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/31 19:26:16 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 01:00:16 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
+#include <stdio.h>
+#include <sys/time.h>
+#include "unistd.h"
 
 int	is_someone_died(t_data *data)
 {
@@ -22,7 +25,7 @@ int	is_someone_died(t_data *data)
 	return (state);
 }
 
-int	get_simulation_state(t_data *data)
+static int	get_simulation_state(t_data *data)
 {
 	int	state;
 
@@ -40,11 +43,10 @@ int	get_simulation_state(t_data *data)
 	return (state);
 }
 
-// 1. Simülasyonun başlamasını bekler ve tek filozof durumunu yönetir
 int	philo_start(t_philo *ph)
 {
 	while (get_simulation_state(ph->data) != 1)
-		;
+		usleep(1);
 	pthread_mutex_lock(&ph->last_meal_mutex);
 	ph->last_meal = get_time_ms();
 	pthread_mutex_unlock(&ph->last_meal_mutex);

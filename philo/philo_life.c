@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   philo_life.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 19:20:41 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/31 19:29:00 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 00:57:44 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
 #include "utils.h"
+#include <sys/time.h>
 
 static void	philo_take_forks(t_philo *ph)
 {

@@ -3,16 +3,19 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:11:37 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/31 19:22:24 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 00:57:37 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
 
-int	is_valid_number(char *str)
+static int	is_valid_number(char *str)
 {
 	if (*str == '-')
 		str++;
@@ -44,7 +47,7 @@ int	parse_arguments(t_data *data, int ac, char **av)
 	return (0);
 }
 
-void	start_simulation(t_data *data)
+static void	start_simulation(t_data *data)
 {
 	int			i;
 	t_philo		*ph;
@@ -73,7 +76,7 @@ void	start_simulation(t_data *data)
 	}
 }
 
-void	join_and_destroy(t_data *data)
+static void	join_and_destroy(t_data *data)
 {
 	int	i;
 

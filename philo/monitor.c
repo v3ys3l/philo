@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   monitor.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 19:18:34 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/31 19:27:57 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 00:57:42 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
 #include "utils.h"
+#include <stdio.h>
+#include <sys/time.h>
 
 static void	monitor_start(t_data *data)
 {
@@ -51,27 +52,39 @@ static int	check_philo_full(t_data *data, t_philo *ph)
 	return (is_full);
 }
 
+static int	check_all_philos(t_data *data)
+{
+	int	i;
+	int	full;
+
+	i = 0;
+	full = 0;
+	while (i < data->number_of_philosophers)
+	{
+		if (check_philo_death(data, &data->philos[i]))
+			return (-1);
+		if (check_philo_full(data, &data->philos[i]))
+			full++;
+		i++;
+	}
+	if (data->must_eat > 0 && full == data->number_of_philosophers)
+		return (1);
+	return (0);
+}
+
 void	*monitor(void *arg)
 {
 	t_data	*data;
-	int		i;
-	int		full;
+	int		result;
 
 	data = (t_data *)arg;
 	monitor_start(data);
 	while (1)
 	{
-		i = 0;
-		full = 0;
-		while (i < data->number_of_philosophers)
-		{
-			if (check_philo_death(data, &data->philos[i]))
-				return (NULL);
-			if (check_philo_full(data, &data->philos[i]))
-				full++;
-			i++;
-		}
-		if (data->must_eat > 0 && full == data->number_of_philosophers)
+		result = check_all_philos(data);
+		if (result == -1)
+			return (NULL);
+		if (result == 1)
 		{
 			pthread_mutex_lock(&data->someone_died_mutex);
 			data->someone_died = 1;

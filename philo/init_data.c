@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   init_data.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/31 19:22:33 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/31 19:22:48 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 00:57:28 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
+#include <stdlib.h>
 
 int	init_mutexes_and_memory(t_data *data)
 {

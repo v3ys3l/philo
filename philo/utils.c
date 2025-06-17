@@ -3,16 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vbicer <vbicer@student.42kocaeli.com.tr    +#+  +:+       +#+        */
+/*   By: vbicer <vbicer@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/01 01:05:11 by vbicer            #+#    #+#             */
-/*   Updated: 2025/05/26 14:57:10 by vbicer           ###   ########.fr       */
+/*   Updated: 2025/06/12 00:57:53 by vbicer           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.h"
+#include <stdio.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 long	get_time_ms(void)
 {
@@ -31,6 +33,16 @@ void	smart_sleep(long time)
 		usleep(250);
 }
 
+static int	ft_strcmp(char *dest, char *src)
+{
+	int	i;
+
+	i = 0;
+	while (dest[i] && src[i] && dest[i] == src[i])
+		i++;
+	return ((unsigned char)dest[i] - (unsigned char)src[i]);
+}
+
 void	print_action(t_philo *philo, char *action)
 {
 	long	time;
@@ -39,13 +51,13 @@ void	print_action(t_philo *philo, char *action)
 	if (!is_someone_died(philo->data))
 	{
 		time = get_time_ms() - philo->data->start_time;
-		if (strcmp(action, "is thinking") == 0)
+		if (ft_strcmp(action, "is thinking") == 0)
 			printf("%ld %d \033[34mis thinking\033[0m\n", time, philo->id);
-		else if (strcmp(action, "has taken a fork") == 0)
+		else if (ft_strcmp(action, "has taken a fork") == 0)
 			printf("%ld %d \033[32mhas taken a fork\033[0m\n", time, philo->id);
-		else if (strcmp(action, "is eating") == 0)
+		else if (ft_strcmp(action, "is eating") == 0)
 			printf("%ld %d \033[33mis eating\033[0m\n", time, philo->id);
-		else if (strcmp(action, "is sleeping") == 0)
+		else if (ft_strcmp(action, "is sleeping") == 0)
 			printf("%ld %d \033[35mis sleeping\033[0m\n", time, philo->id);
 		else
 			printf("%ld %d %s\n", time, philo->id, action);
